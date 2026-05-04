@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinGuard — Results</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #050d1a;
+            --surface: #0d1f35;
+            --border: #1a3150;
+            --accent: #00e5ff;
+            --accent2: #7c3aed;
+            --danger: #f43f5e;
+            --warning: #f59e0b;
+            --success: #10b981;
+            --text: #e2f4ff;
+            --muted: #5a7fa0;
+            --card: #0a1929;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(0,229,255,0.02) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0,229,255,0.02) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 3rem;
+            border-bottom: 1px solid var(--border);
+            background: rgba(5,13,26,0.9);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo {
+            font-family: 'Space Mono', monospace;
+            font-size: 1.1rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo-icon {
+            width: 28px;
+            height: 28px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+        }
+
+        .btn-back {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: all 0.2s;
+            letter-spacing: 0.05em;
+        }
+
+        .btn-back:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+        }
+
+        .page-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .page-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 0.6rem;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 300;
+        }
+
+        .page-title strong {
+            font-weight: 600;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+            nav { padding: 1rem 1.5rem; }
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+        }
+
+        .stat-card.total::before { background: var(--accent); }
+        .stat-card.anomalies::before { background: var(--danger); }
+        .stat-card.highrisk::before { background: var(--warning); }
+        .stat-card.avgamt::before { background: var(--success); }
+
+        .stat-label {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: 0.8rem;
+        }
+
+        .stat-value {
+            font-family: 'Space Mono', monospace;
+            font-size: 2rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card.total .stat-value { color: var(--accent); }
+        .stat-card.anomalies .stat-value { color: var(--danger); }
+        .stat-card.highrisk .stat-value { color: var(--warning); }
+        .stat-card.avgamt .stat-value { color: var(--success); }
+
+        .stat-sub {
+            font-size: 0.75rem;
+            color: var(--muted);
+            margin-top: 0.4rem;
+        }
+
+        /* Chart section */
+        .chart-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .section-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .section-title::before {
+            content: '';
+            display: block;
+            width: 3px;
+            height: 14px;
+            background: var(--accent);
+            border-radius: 2px;
+        }
+
+        .chart-img {
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        /* Flagged transactions table */
+        .table-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .table-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .flag-count {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            background: rgba(244,63,94,0.1);
+            border: 1px solid rgba(244,63,94,0.3);
+            color: var(--danger);
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--muted);
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: rgba(0,0,0,0.3);
+        }
+
+        th {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 1rem 1.2rem;
+            text-align: left;
+            white-space: nowrap;
+        }
+
+        td {
+            padding: 1rem 1.2rem;
+            font-size: 0.85rem;
+            border-bottom: 1px solid rgba(26,49,80,0.5);
+            vertical-align: top;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background: rgba(0,229,255,0.02);
+        }
+
+        .txn-id {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.78rem;
+            color: var(--accent);
+        }
+
+        .amount {
+            font-family: 'Space Mono', monospace;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .risk-badge {
+            display: inline-flex;
+            align-items: center;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            font-weight: 700;
+            padding: 0.3rem 0.6rem;
+            border-radius: 6px;
+            white-space: nowrap;
+        }
+
+        .risk-critical {
+            background: rgba(244,63,94,0.15);
+            border: 1px solid rgba(244,63,94,0.4);
+            color: #f87171;
+        }
+
+        .risk-high {
+            background: rgba(245,158,11,0.15);
+            border: 1px solid rgba(245,158,11,0.4);
+            color: #fbbf24;
+        }
+
+        .risk-medium {
+            background: rgba(99,102,241,0.15);
+            border: 1px solid rgba(99,102,241,0.4);
+            color: #a5b4fc;
+        }
+
+        .explanation {
+            font-size: 0.78rem;
+            color: var(--muted);
+            line-height: 1.6;
+            max-width: 380px;
+        }
+
+        .explanation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .explanation-item::before {
+            content: '›';
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .category-tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            background: rgba(124,58,237,0.1);
+            border: 1px solid rgba(124,58,237,0.25);
+            color: #c4b5fd;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .hour-tag {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+        }
+
+        .api-hint {
+            margin-top: 1.5rem;
+            background: rgba(0,229,255,0.03);
+            border: 1px solid rgba(0,229,255,0.15);
+            border-radius: 10px;
+            padding: 1.2rem 1.5rem;
+        }
+
+        .api-hint-title {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--accent);
+            letter-spacing: 0.1em;
+            margin-bottom: 0.6rem;
+        }
+
+        .api-hint code {
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--muted);
+            background: rgba(0,0,0,0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--muted);
+            letter-spacing: 0.05em;
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="logo">
+            <div class="logo-icon">⬡</div>
+            FINGUARD
+        </div>
+        <a href="/" class="btn-back">← NEW UPLOAD</a>
+    </nav>
+
+    <div class="container">
+
+        <div class="page-header">
+            <div class="page-label">Analysis Complete</div>
+            <div class="page-title">
+                Found <strong>{{ anomaly_count }} suspicious transaction{{ 's' if anomaly_count != 1 else '' }}</strong>
+                out of {{ total }} total
+            </div>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="stats-grid">
+            <div class="stat-card total">
+                <div class="stat-label">Total Transactions</div>
+                <div class="stat-value">{{ total }}</div>
+                <div class="stat-sub">Processed in this batch</div>
+            </div>
+            <div class="stat-card anomalies">
+                <div class="stat-label">Anomalies Detected</div>
+                <div class="stat-value">{{ anomaly_count }}</div>
+                <div class="stat-sub">{{ "%.1f"|format(anomaly_count / total * 100) }}% of batch</div>
+            </div>
+            <div class="stat-card highrisk">
+                <div class="stat-label">High Risk (≥70)</div>
+                <div class="stat-value">{{ high_risk_count }}</div>
+                <div class="stat-sub">Require immediate review</div>
+            </div>
+            <div class="stat-card avgamt">
+                <div class="stat-label">Avg Transaction</div>
+                <div class="stat-value">₹{{ "{:,.0f}".format(avg_amount) }}</div>
+                <div class="stat-sub">Baseline amount</div>
+            </div>
+        </div>
+
+        <!-- Chart -->
+        {% if chart_b64 %}
+        <div class="chart-section">
+            <div class="section-title">Risk Visualization</div>
+            <img src="data:image/png;base64,{{ chart_b64 }}" class="chart-img" alt="Risk Analysis Chart">
+        </div>
+        {% endif %}
+
+        <!-- Flagged transactions table -->
+        <div class="table-section">
+            <div class="table-header">
+                <div class="section-title" style="margin: 0;">Flagged Transactions</div>
+                {% if flagged %}
+                <span class="flag-count">{{ flagged|length }} flagged</span>
+                {% endif %}
+            </div>
+
+            {% if not flagged %}
+            <div class="empty-state">
+                <div class="empty-icon">✅</div>
+                <div style="font-size: 1rem; color: var(--text); margin-bottom: 0.5rem;">
+                    No anomalies detected
+                </div>
+                <div>All transactions appear within normal parameters.</div>
+            </div>
+            {% else %}
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Transaction</th>
+                            <th>Amount</th>
+                            <th>Category</th>
+                            <th>User</th>
+                            <th>Hour</th>
+                            <th>Risk Score</th>
+                            <th>Why Flagged</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for txn in flagged %}
+                        <tr>
+                            <td class="txn-id">{{ txn.transaction_id }}</td>
+                            <td class="amount">₹{{ "{:,.2f}".format(txn.amount) }}</td>
+                            <td><span class="category-tag">{{ txn.category }}</span></td>
+                            <td style="color: var(--muted); font-size: 0.8rem;">{{ txn.user_id }}</td>
+                            <td class="hour-tag">{{ "%02d:00"|format(txn.hour|int) }}</td>
+                            <td>
+                                {% if txn.risk_score >= 70 %}
+                                <span class="risk-badge risk-critical">{{ txn.risk_score }}</span>
+                                {% elif txn.risk_score >= 50 %}
+                                <span class="risk-badge risk-high">{{ txn.risk_score }}</span>
+                                {% else %}
+                                <span class="risk-badge risk-medium">{{ txn.risk_score }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="explanation">
+                                    {% for reason in txn.explanation.split(' | ') %}
+                                    <div class="explanation-item">{{ reason }}</div>
+                                    {% endfor %}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- API usage hint -->
+        <div class="api-hint">
+            <div class="api-hint-title">API INTEGRATION</div>
+            <p style="font-size: 0.82rem; color: var(--muted); line-height: 1.7;">
+                Score transactions programmatically via
+                <code>POST /score</code> with a JSON body containing a
+                <code>transactions</code> array. View summary stats at
+                <code>GET /api/stats</code>.
+                Both endpoints return structured JSON for SAP/ERP integration.
+            </p>
+        </div>
+
+    </div>
+
+    <footer>
+        FINGUARD ANOMALY DETECTION SYSTEM &nbsp;·&nbsp; POWERED BY ISOLATION FOREST ML
+    </footer>
+</body>
+</html>
