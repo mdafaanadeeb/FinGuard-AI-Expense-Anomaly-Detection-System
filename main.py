@@ -10,9 +10,6 @@ from app.routes import bp, get_model
 
 
 def create_app():
-    """
-    Creates and configures the Flask application.
-    """
 
     app = Flask(
         __name__,
@@ -20,45 +17,29 @@ def create_app():
         static_folder="app/static"
     )
 
-    # Secret key
     app.secret_key = os.environ.get(
         "SECRET_KEY",
-        "dev-secret-key-change-in-production"
+        "dev-secret-key"
     )
 
-    # Register blueprint routes
     app.register_blueprint(bp)
 
     return app
 
 
-# ==========================================
-# GLOBAL APP OBJECT FOR GUNICORN / RENDER
-# ==========================================
-
+# Global Flask app for Gunicorn
 app = create_app()
 
 # Initialize database
 init_db()
 
-# Preload ML model
+# Preload model
 model, scaler = get_model()
 
-if model:
-    print("[STARTUP] Pre-trained model loaded successfully")
-else:
-    print("[STARTUP] No trained model found")
-
-
-# ==========================================
-# LOCAL DEVELOPMENT SERVER
-# ==========================================
 
 if __name__ == "__main__":
 
     PORT = int(os.environ.get("PORT", 5000))
-
-    print(f"[STARTUP] Flask server running on port {PORT}")
 
     app.run(
         host="0.0.0.0",
